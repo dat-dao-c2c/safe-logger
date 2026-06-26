@@ -1,7 +1,7 @@
 {
   "name": "@datdm198x/safe-logger",
   "version": "1.0.0",
-  "description": "Safe logger utility",
+  "description": "A utility to safely mask and sanitize sensitive data in objects for logging purposes, preventing PII and credentials from being logged.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -16,7 +16,15 @@
     "type": "git",
     "url": "git+https://github.com/dat-dao-c2c/safe-logger.git"
   },
-  "keywords": [],
+  "keywords": [
+    "logging",
+    "masking",
+    "sanitization",
+    "security",
+    "pii",
+    "data-protection",
+    "safe-log"
+  ],
   "author": "",
   "license": "ISC",
   "type": "module",
