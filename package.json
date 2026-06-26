@@ -1,5 +1,5 @@
 {
-  "name": "@dmd/safe-logger",
+  "name": "@dat-dao-c2c/safe-logger",
   "version": "1.0.0",
   "description": "Safe logger utility",
   "main": "dist/index.js",

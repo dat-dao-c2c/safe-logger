@@ -11,13 +11,13 @@ A lightweight TypeScript utility to sanitize sensitive information from objects 
 ## Installation
 
 ```bash
-npm install @dmd/safe-logger
+npm install @dat-dao-c2c/safe-logger
 ```
 
 ## Usage
 
 ```typescript
-import { safeLog } from '@dmd/safe-logger';
+import { safeLog } from '@dat-dao-c2c/safe-logger';
 
 const sensitiveData = {
   username: 'john_doe',
