@@ -1,5 +1,5 @@
 {
-  "name": "@dat-dao-c2c/safe-logger",
+  "name": "@datdm198x/safe-logger",
   "version": "1.0.0",
   "description": "Safe logger utility",
   "main": "dist/index.js",
@@ -31,8 +31,5 @@
   "devDependencies": {
     "@types/node": "^26.0.1",
     "vitest": "^4.1.9"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
   }
 }
