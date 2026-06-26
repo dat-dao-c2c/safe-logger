@@ -1,1 +1,1 @@
-export * from './safe-log';
+export * from './safe-log.js';

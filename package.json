@@ -1,5 +1,5 @@
 {
-  "name": "@datdao/safe-logger",
+  "name": "@dmd/safe-logger",
   "version": "1.0.0",
   "description": "Safe logger utility",
   "main": "dist/index.js",
@@ -8,7 +8,7 @@
     "dist"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest run",
     "build": "tsup src/index.ts --format cjs,esm --dts",
     "prepare": "npm run build"
   },
@@ -19,7 +19,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/dat-dao-c2c/safe-logger/issues"
   },
@@ -29,7 +29,8 @@
     "typescript": "^6.0.3"
   },
   "devDependencies": {
-    "@types/node": "^26.0.1"
+    "@types/node": "^26.0.1",
+    "vitest": "^4.1.9"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"

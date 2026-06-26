@@ -84,7 +84,8 @@ function maskEmail(email: string): string {
         return maskValue(email);
     }
 
-    const [name, domain] = parts;
+    const name = parts[0] ?? '';
+    const domain = parts[1] ?? '';
 
     if (name.length <= 2) {
         return `**@${domain}`;
@@ -152,12 +153,61 @@ const FIELD_MASKERS = new Map<
     ['password', maskPassword],
     ['passwd', maskPassword],
     ['pwd', maskPassword],
+    ['pass', maskToken],
 
     ['email', maskEmail],
     ['phone', maskPhone],
 
     ['creditcard', maskCreditCard],
     ['cvv', () => '***'],
+
+    // AWS
+    ['awsaccesskeyid', maskToken],
+    ['awssecretaccesskey', maskToken],
+    ['awsregion', maskToken],
+    ['smtpusername', maskToken],
+    ['smtppassword', maskToken],
+    ['sessmtpusername', maskToken],
+    ['sessmtppassword', maskToken],
+
+    // Security & Auth
+    ['clientid', maskToken],
+    ['clientsecret', maskToken],
+    ['jwtsecret', maskToken],
+    ['encryptionkey', maskToken],
+    ['sshkey', maskToken],
+    ['rsakey', maskToken],
+    ['masterkey', maskToken],
+    ['salt', maskToken],
+    ['encryptionpassword', maskPassword],
+    ['dbpassword', maskPassword],
+    ['dbpass', maskPassword],
+    ['connectionstring', maskToken],
+    ['connstr', maskToken],
+    ['ldapbindpassword', maskPassword],
+    ['stripekey', maskToken],
+    ['stripesecret', maskToken],
+    ['sendgridapikey', maskToken],
+    ['slackwebhookurl', maskToken],
+    ['ssn', maskToken],
+    ['socialsecuritynumber', maskToken],
+    ['nationalid', maskToken],
+    ['passportnumber', maskToken],
+    ['driverslicense', maskToken],
+    ['dob', maskToken],
+    ['dateofbirth', maskToken],
+    ['cardnumber', maskCreditCard],
+    ['cvc', () => '***'],
+    ['accountnumber', maskToken],
+    ['routingnumber', maskToken],
+
+    // Misc
+    ['username', maskToken],
+    ['userid', maskToken],
+    ['sessionid', maskToken],
+    ['ip', maskToken],
+    ['ipaddress', maskToken],
+    ['macaddress', maskToken],
 
     ['jwt', maskToken],
     ['token', maskToken],
@@ -167,6 +217,14 @@ const FIELD_MASKERS = new Map<
     ['apikey', maskToken],
     ['secret', maskToken],
     ['cookie', maskToken],
+    ['privatekey', maskToken],
+
+    // Database connection strings
+    ['mongouri', maskToken],
+    ['redisuri', maskToken],
+    ['mysqluri', maskToken],
+    ['postgresqluri', maskToken],
+    ['pgsql', maskToken],
 ]);
 
 /**
@@ -179,6 +237,7 @@ const SENSITIVE_KEYWORDS = [
     'password',
     'passwd',
     'pwd',
+    'pass',
 
     'token',
     'jwt',
@@ -186,6 +245,7 @@ const SENSITIVE_KEYWORDS = [
 
     'secret',
     'apikey',
+    'accesskey',
 
     'authorization',
     'cookie',
@@ -193,15 +253,42 @@ const SENSITIVE_KEYWORDS = [
     'creditcard',
     'cardnumber',
     'cvv',
+    'cvc',
 
     'otp',
 
     'privatekey',
 
     'clientsecret',
+    'clientid',
 
     'accesstoken',
     'refreshtoken',
+
+    'username',
+    'userid',
+    'sessionid',
+    'ipaddress',
+    'encryption',
+    'ssh',
+    'rsa',
+    'master',
+    'salt',
+    'connection',
+    'conn',
+    'ldap',
+    'stripe',
+    'sendgrid',
+    'slack',
+    'ssn',
+    'socialsecurity',
+    'national',
+    'passport',
+    'drivers',
+    'dob',
+    'birth',
+    'account',
+    'routing',
 ];
 
 /**
