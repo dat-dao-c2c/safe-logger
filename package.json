@@ -1,6 +1,6 @@
 {
   "name": "@datdm198x/safe-logger",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A utility to safely mask and sanitize sensitive data in objects for logging purposes, preventing PII and credentials from being logged.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
