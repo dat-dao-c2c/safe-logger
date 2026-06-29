@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { safeLog } from '../src/index.js';
+import { safeLog, registerFieldMasker } from '../src/index.js';
 
 describe('safeLog', () => {
   it('should mask sensitive fields as expected', () => {
@@ -141,5 +141,32 @@ describe('safeLog', () => {
     expect(result.db_password).toBe('********');
     expect(result.ldap_bind_password).toBe('********');
     expect(result.cvc).toBe('***');
+  });
+
+  it('should allow registering a custom field masker', () => {
+    const payload = {
+      mySecretField: 'secretValue',
+    };
+    
+    // Register custom masker
+    registerFieldMasker('mySecretField', (value) => 'customMasked');
+    
+    const result = safeLog(payload);
+    expect(result.mySecretField).toBe('customMasked');
+  });
+
+  it('should use maskToken as default when registering a field masker without a masker function', () => {
+    const payload = {
+      defaultSecretField: 'secretValue1234',
+    };
+    
+    // Register with default masker
+    registerFieldMasker('defaultSecretField');
+    
+    const result = safeLog(payload);
+    // maskToken uses minVisible: 4, visiblePercent: 0.1
+    // "secretValue1234" (length 15) -> 15 * 0.1 = 1.5 -> minVisible 4 visible
+    // expected: ***********1234
+    expect(result.defaultSecretField).toBe('***********1234');
   });
 });

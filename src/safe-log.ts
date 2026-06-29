@@ -146,6 +146,13 @@ function maskToken(token: string): string {
  * ============================================================================
  */
 
+export function registerFieldMasker(
+    key: string,
+    masker?: (value: string) => string
+): void {
+    FIELD_MASKERS.set(normalizeKey(key), masker ?? maskToken);
+}
+
 const FIELD_MASKERS = new Map<
     string,
     (value: string) => string
