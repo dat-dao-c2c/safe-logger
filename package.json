@@ -4,12 +4,21 @@
   "description": "A utility to safely mask and sanitize sensitive data in objects for logging purposes, preventing PII and credentials from being logged.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "safe-log": "dist/cli.js",
+    "safe-logger": "dist/cli.js",
+    "sanity-logger": "dist/cli.js",
+    "my-logger": "dist/cli.js",
+    "sanityLogger": "dist/cli.js",
+    "safeLogger": "dist/cli.js",
+    "myLogger": "dist/cli.js"
+  },
   "files": [
     "dist"
   ],
   "scripts": {
     "test": "vitest run",
-    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "build": "tsup",
     "prepare": "npm run build"
   },
   "repository": {
@@ -39,5 +48,8 @@
   "devDependencies": {
     "@types/node": "^26.0.1",
     "vitest": "^4.1.9"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

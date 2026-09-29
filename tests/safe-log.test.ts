@@ -61,7 +61,82 @@ describe('safeLog', () => {
 
     const result = safeLog(payload);
     expect(result.level1.password).toBe('********');
-    expect(result.level1.level2.token).toBe('abc'); // Too short to mask
+    expect(result.level1.level2.token).toBe('***'); // Too short: fully masked
+  });
+
+  it('should fully mask values too short to reveal a suffix', () => {
+    const result = safeLog({
+      token: 'abcdefgh', // 8 chars, 4 visible would expose half
+      apiKey: 'abcdefghi', // 9 chars: suffix allowed
+      phone: '1234',
+    });
+
+    expect(result.token).toBe('********');
+    expect(result.apiKey).toBe('*****fghi');
+    expect(result.phone).toBe('****');
+  });
+
+  it('should mask strings inside arrays under a sensitive key', () => {
+    const result = safeLog({
+      tokens: ['ghp_abcdefghijkl', 'ghp_mnopqrstuvwx'],
+      passwords: [['nested-secret']],
+      tags: ['public', 'visible'],
+    });
+
+    expect(result.tokens).toEqual(['************ijkl', '************uvwx']);
+    expect(result.passwords).toEqual([['*********cret']]); // keyword rule -> maskToken
+    expect(result.tags).toEqual(['public', 'visible']);
+  });
+
+  it('should mask primitives inside objects under a sensitive key', () => {
+    const result = safeLog({
+      credentials: { value: 'plain-value-1234' },
+      secret: { value: 'sk_live_abcdefghijkl', token: 'tok_abcdefghijkl' },
+      clientSecrets: [{ value: 'abcdefghijklmnop' }],
+    });
+
+    expect(result.credentials.value).toBe('plain-value-1234'); // not sensitive
+    expect(result.secret.value).toBe('****************ijkl');
+    expect(result.secret.token).toBe('************ijkl');
+    expect(result.clientSecrets[0]!.value).toBe('************mnop');
+  });
+
+  it('should mask non-string values under sensitive keys', () => {
+    const result = safeLog({
+      cvv: 123,
+      cardNumber: 4111111111111111,
+      accountNumber: 1234567890123n,
+      pin: 1234,
+      hasPassword: true,
+      age: 30,
+    });
+
+    expect(result.cvv).toBe('***');
+    expect(result.cardNumber).toBe('************1111');
+    expect(result.accountNumber).toBe('*********0123');
+    expect(result.pin).toBe(1234); // "pin" is not a registered key
+    expect(result.hasPassword).toBe(true); // booleans are kept
+    expect(result.age).toBe(30);
+  });
+
+  it('should replace circular references instead of overflowing the stack', () => {
+    const payload: Record<string, unknown> = { name: 'root', password: 'x' };
+    payload.self = payload;
+    payload.list = [payload];
+
+    const result = safeLog(payload) as Record<string, unknown>;
+
+    expect(result.self).toBe('[Circular]');
+    expect(result.list).toEqual(['[Circular]']);
+    expect(result.password).toBe('********');
+  });
+
+  it('should keep repeated (non-circular) references', () => {
+    const shared = { apiKey: 'abcdefghijklmnop' };
+    const result = safeLog({ a: shared, b: shared });
+
+    expect(result.a.apiKey).toBe('************mnop');
+    expect(result.b.apiKey).toBe('************mnop');
   });
 
   it('should mask AWS and SMTP fields with different casing', () => {

@@ -53,8 +53,12 @@ export function maskValue(
         Math.floor(length * visiblePercent),
     );
 
-    if (visible >= length) {
-        return value;
+    /**
+     * Too short to reveal a suffix without exposing most of the value:
+     * mask it entirely.
+     */
+    if (length <= visible * 2) {
+        return maskChar.repeat(length);
     }
 
     return (
@@ -110,8 +114,8 @@ function maskEmail(email: string): string {
 function maskPhone(phone: string): string {
     const digits = phone.replace(/\D/g, '');
 
-    if (digits.length <= 4) {
-        return phone;
+    if (digits.length <= 8) {
+        return '*'.repeat(digits.length);
     }
 
     return (
@@ -323,65 +327,93 @@ function isSensitiveKey(key: string): boolean {
  * ============================================================================
  */
 
-function sanitize(value: unknown): unknown {
+type Masker = (value: string) => string;
+
+const CIRCULAR = '[Circular]';
+
+/**
+ * Resolve the masker for a field name.
+ *
+ * 1. Exact rule
+ * 2. Keyword rule
+ */
+function resolveMasker(key: string): Masker | undefined {
+    const normalized = normalizeKey(key);
+
+    const masker = FIELD_MASKERS.get(normalized);
+
+    if (masker) {
+        return masker;
+    }
+
+    if (isSensitiveKey(normalized)) {
+        return maskToken;
+    }
+
+    return undefined;
+}
+
+/**
+ * @param value      Value to sanitize.
+ * @param masker     Masker inherited from the nearest sensitive ancestor key.
+ *                   Applied to every primitive in the subtree that is not
+ *                   matched by a more specific rule.
+ * @param ancestors  Objects on the current path, used to detect cycles.
+ */
+function sanitize(
+    value: unknown,
+    masker: Masker | undefined,
+    ancestors: WeakSet<object>,
+): unknown {
     if (value === null || value === undefined) {
         return value;
     }
 
-    if (Array.isArray(value)) {
-        return value.map(sanitize);
-    }
-
     if (typeof value !== 'object') {
+        /**
+         * Booleans carry no secret (e.g. hasPassword: true) and are kept.
+         */
+        if (
+            masker &&
+            (typeof value === 'string' ||
+                typeof value === 'number' ||
+                typeof value === 'bigint')
+        ) {
+            return masker(String(value));
+        }
+
         return value;
     }
 
-    const obj = value as Record<string, unknown>;
+    if (ancestors.has(value)) {
+        return CIRCULAR;
+    }
 
-    return Object.fromEntries(
-        Object.entries(obj).map(([key, value]) => {
+    ancestors.add(value);
 
-            if (typeof value === 'string') {
+    try {
+        if (Array.isArray(value)) {
+            return value.map(item => sanitize(item, masker, ancestors));
+        }
 
-                const normalized = normalizeKey(key);
-
-                /**
-                 * 1. Exact rule
-                 */
-                const masker = FIELD_MASKERS.get(normalized);
-
-                if (masker) {
-                    return [key, masker(value)];
-                }
-
-                /**
-                 * 2. Keyword rule
-                 */
-                if (isSensitiveKey(normalized)) {
-                    return [key, maskToken(value)];
-                }
-
-                /**
-                 * 3. Keep original
-                 */
-                return [key, value];
-            }
-
-            if (
-                value &&
-                typeof value === 'object'
-            ) {
-                return [key, sanitize(value)];
-            }
-
-            return [key, value];
-        }),
-    );
+        return Object.fromEntries(
+            Object.entries(value).map(([key, child]) => [
+                key,
+                sanitize(child, resolveMasker(key) ?? masker, ancestors),
+            ]),
+        );
+    } finally {
+        /**
+         * Only the current path counts: the same object referenced twice
+         * in sibling branches is not a cycle.
+         */
+        ancestors.delete(value);
+    }
 }
 
 /**
  * Public API
  */
 export function safeLog<T>(value: T): T {
-    return sanitize(value) as T;
+    return sanitize(value, undefined, new WeakSet()) as T;
 }

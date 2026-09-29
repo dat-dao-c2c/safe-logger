@@ -137,6 +137,46 @@ Output:
 */
 ```
 
+## Command Line
+
+The package ships a `safe-log` command for shell scripts and terminals.
+The same command is also available under these aliases:
+`safe-logger`, `sanity-logger`, `my-logger`, `sanityLogger`, `safeLogger`, `myLogger`.
+
+```bash
+npm install -g @datdm198x/safe-logger   # or run without installing: npx @datdm198x/safe-logger ...
+```
+
+```bash
+# Environment variable by name (the raw value never appears on the command line)
+safe-log API_KEY
+# API_KEY=****************ijkl
+
+# JSON object / array
+safe-log '{"API_KEY": "123456", "user": {"email": "john.doe@gmail.com"}}'
+# {"API_KEY":"******","user":{"email":"j******e@gmail.com"}}
+
+# stdin: JSON, or KEY=VALUE lines (env output, .env files)
+curl -s https://api.example.com/config | safe-log --pretty
+env | safe-log
+cat .env | safe-log
+
+# NAME=VALUE
+safe-log DB_PASSWORD=hunter2
+# DB_PASSWORD=********
+```
+
+| Option | Description |
+|---|---|
+| `-p`, `--pretty` | Pretty-print JSON output |
+| `-h`, `--help` | Show help |
+
+Exit codes: `0` success, `1` input error (unset variable, invalid JSON, stdin over 10 MB), `2` usage error.
+
+> **Security:** prefer `safe-log NAME` or stdin over `safe-log NAME=VALUE` / inline JSON containing
+> real secrets — command-line arguments are recorded in shell history and visible in `ps`.
+> Masking is key-based: lines that are not `KEY=VALUE` (and JSON values under non-sensitive keys)
+> are printed unchanged.
 
 ## Development
 
